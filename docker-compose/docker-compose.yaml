@@ -1,0 +1,19 @@
+services: 
+# Database MySQL DB relationnelle
+  mysql-db:
+    hostname: mysql-btc
+    container_name: mysql-btc
+    image: sanourith/mysql:v1
+    restart: always
+    env_file:
+      - ../env/private.env
+    ports:
+      - "3306:3306" # "3307:3306"
+    volumes:
+      - mysql-btc-data:/var/lib/mysql
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    # networks:
+    #   - btc_project
+
+volumes:
+  mysql-btc-data:
