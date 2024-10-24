@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 def main():
     setup_logger()
-    endpoints = ["klines", "ticker/24hr"]
+    endpoints = ["klines", "ticker/24hr", "ticker/bookTicker"]
     for endpoint in endpoints:
         get_data_from_binance(endpoint)
         logger.info(f"Données ajoutées depuis la fonction pour {endpoint}")
@@ -55,4 +55,13 @@ if __name__ == "__main__":
 #   "firstId": 28385,   // First tradeId
 #   "lastId": 28460,    // Last tradeId
 #   "count": 76         // Trade count
+# }
+
+# Réponse bookTicker :
+# {
+#   "symbol": "LTCBTC",
+#   "bidPrice": "4.00000000",
+#   "bidQty": "431.00000000",
+#   "askPrice": "4.00000200",
+#   "askQty": "9.00000000"
 # }

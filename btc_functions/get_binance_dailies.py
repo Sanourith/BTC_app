@@ -56,6 +56,12 @@ def get_data_from_binance(endpoint):
         } 
         file = "prices_BTC_24h"
 
+    elif endpoint == "/api/v3/ticker/bookTicker":
+        params ={
+            'symbol': 'BTCUSDT'
+        }
+        file = "bookticker"
+
     else:
         logger.error(message:= f'Endpoint non utilisable ({endpoint}), utiliser "klines" ou "ticker/24h".')
         raise ValueError(message)
