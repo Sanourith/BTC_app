@@ -1,9 +1,15 @@
 from btc_functions.get_binance_dailies import get_data_from_binance
+from btc_functions.logger_config import setup_logger
+import logging
+
+logger = logging.getLogger(__name__)
 
 def main():
+    setup_logger()
     endpoints = ["klines", "ticker/24hr"]
     for endpoint in endpoints:
         get_data_from_binance(endpoint)
+        logger.info(f"Données ajoutées depuis la fonction pour {endpoint}")
 
 if __name__ == "__main__":
     main()

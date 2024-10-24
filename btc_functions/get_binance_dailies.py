@@ -2,6 +2,9 @@ import os
 import json 
 import requests 
 from datetime import datetime, timedelta
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 # Les endpoints utilisables : klines, ticker/24h
 
@@ -12,9 +15,9 @@ def data_to_json(data, file, start_yesterday):
 
         with open(file_path, "w") as f:
             json.dump(data, f, indent=4)
-        print(f"Données enregistrées dans le fichier {file_path}.")
+        logger.info(f"Données enregistrées dans le fichier {file_path}.")
     else:
-        print(f"Erreur sur l'enregistrement de la requête, pas de données.")
+        logger.warning(f"Erreur sur l'enregistrement de la requête, pas de données.")
 
 def request_data(url, endpoint, params):
     full_endpoint = url + endpoint
@@ -22,7 +25,7 @@ def request_data(url, endpoint, params):
     if response.status_code == 200:
         return response.json()
     else:
-        print(f"Erreur de requête HTTP : {response.status_code}")
+        logger.error(f"Erreur de requête HTTP : {response.status_code}")
         return None 
 
 def get_data_from_binance(endpoint):
@@ -54,7 +57,8 @@ def get_data_from_binance(endpoint):
         file = "prices_BTC_24h"
 
     else:
-        raise ValueError(f'Endpoint non utilisable ({endpoint}), utiliser "klines" ou "ticker/24h".')
+        logger.error(message:= f'Endpoint non utilisable ({endpoint}), utiliser "klines" ou "ticker/24h".')
+        raise ValueError(message)
     
     data = request_data(url, endpoint, params)
     if data:
