@@ -14,61 +14,6 @@ def main():
 if __name__ == "__main__":
     main()
 
-# ______________________________________________________________________
-# ______________________________________________________________________
-
-# url = "https://api.binance.com"
-# # /klines
-# endpoint_Klines = "/api/v3/klines"
-# endpoint_24h = "/api/v3/ticker/24hr"
-
-# now = datetime.now()
-# yesterday = now - timedelta(days=1)
-# start_yesterday = datetime(yesterday.year, yesterday.month, yesterday.day, 0, 0, 0)
-# end_yesterday = datetime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59)
-
-# start_timestamp = int(start_yesterday.timestamp() * 1000)
-# end_timestamp = int(end_yesterday.timestamp() * 1000)
-
-# params_Klines = {
-#     'symbol': 'BTCUSDT',
-#     'interval': '5m', #intervalle d'espacement pour revoir les chiffres
-#     'startTime': start_timestamp,
-#     'endTime': end_timestamp,
-#     'limit': 1000
-# }
-
-# response_k = requests.get(url + endpoint_Klines, params=params_Klines)
-# if response_k.status_code == 200:
-#     data = response_k.json()
-#     file_path = f"/home/sanou/BTC/data/1_raw/prices_BTC_KLINES{start_yesterday}.json"
-#     os.makedirs(os.path.dirname(file_path), exist_ok=True)
-
-#     with open(file_path, "w") as f:
-#         json.dump(data, f, indent=4)
-#     print(f"Données enregistrées dans le fichier {file_path}.")
-# else:
-#     print(f"Erreur sur la requête Kline : {response_k.status_code}")
-
-# params_24h = {
-#     'symbol': 'BTCUSDT'
-# }
-
-# response_24 = requests.get(url + endpoint_24h, params=params_24h)
-# if response_24.status_code == 200:
-#     data = response_24.json()
-#     file_path = f"/home/sanou/BTC/data/1_raw/prices_BTC_24h_{start_yesterday}.json"
-#     os.makedirs(os.path.dirname(file_path), exist_ok=True)
-
-#     with open(file_path, "w") as f:
-#         json.dump(data, f, indent=4)
-#     print(f"Données enregistrées dans le fichier {file_path}.")
-# else:
-#     print(f"Erreur sur la requête Kline : {response_k.status_code}")
-
-# ______________________________________________________________________
-# ______________________________________________________________________
-
 # Response_type Klines :
 # [
 #   [
