@@ -33,7 +33,7 @@ def get_data_from_binance(endpoint):
     endpoint = "/api/v3/" + endpoint
     
     now = datetime.now()
-    yesterday = now - timedelta(days=10)
+    yesterday = now - timedelta(days=1)
     start_yesterday = datetime(yesterday.year, yesterday.month, yesterday.day, 0, 0, 0)
     end_yesterday = datetime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59)
 
