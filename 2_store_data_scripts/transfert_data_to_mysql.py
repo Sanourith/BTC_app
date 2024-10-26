@@ -22,6 +22,12 @@ def main():
             # Conversion des fichiers .json en .csv
             db_functions.convert_all_json_to_csv(json_dir, csv_dir)
             logger.info('Conversion des fichiers .json terminée avec succès')
+            # Déplacement des fichiers json pour éviter un double traitement
+            for json_file in glob.glob(os.path.join(json_dir, "prices_BTC_KLINES*.json")):
+                destination = os.path.join(interim_dir, os.path.basename(json_file))
+                shutil.move(json_file, destination)
+                logger.info(f'Fichier {json_file} déplacé vers {destination}.')
+
             # Insertion des données CSV dans la base de données
             for csv_file in glob.glob(os.path.join(csv_dir, "prices_BTC_KLINES*.csv")):
                 db_functions.insert_data_from_csv(connection, csv_file, "klines")
