@@ -3,32 +3,34 @@ import json
 import pymysql 
 import pandas as pd
 from logging import getLogger
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.exc import SQLAlchemyError
 
+load_dotenv()
 logger = getLogger(__name__)
 
 def create_connection():
     try:
-        host=os.getenv('DB_HOST')
-        user=os.getenv('DB_USER')
-        password=os.getenv('DB_PASSWORD')
-        database=os.getenv('DB_NAME')
-        port=int(os.getenv('DB_PORT'))
-
-        logger.info(f'Tentative de connexion à {host}:{port} en tant que/qu\' {user}')
+        # Charger les informations de connexion depuis les variables d'environnement
+        sql_user = os.getenv('DB_USER')
+        sql_password = os.getenv('DB_PASSWORD')
+        sql_host = os.getenv('DB_HOST')
+        sql_port = os.getenv('DB_PORT')
+        sql_database = os.getenv('DB_NAME')
         
-        connection = pymysql.connect(
-            host=os.getenv('DB_HOST'),
-            user=os.getenv('DB_USER'),
-            password=os.getenv('DB_PASSWORD'),
-            database=os.getenv('DB_NAME'),
-            port=int(os.getenv('DB_PORT')),
-            charset='utf8mb4',
-            cursorclass=pymysql.cursors.DictCursor
-        )
-        logger.info(f'Connexion à MySQL réussie.')
-        return connection
+        # Chaîne de connexion
+        connection_string = f"mysql+pymysql://{sql_user}:{sql_password}@{sql_host}:{sql_port}/{sql_database}"
+        logger.info(f'Tentative de connexion à {sql_host}:{sql_port} en tant que {sql_user}')
+        
+        # Création de l'engine avec SQLAlchemy
+        engine = create_engine(connection_string)
+        # connection = engine.connect()
+        
+        logger.info("Connexion à MySQL réussie avec SQLAlchemy.")
+        return engine
     
-    except Exception as e:
+    except SQLAlchemyError as e:
         logger.error(f'Erreur lors de la connexion à MySQL : {e}')
         return None 
 
@@ -62,36 +64,25 @@ def convert_all_json_to_csv(json_dir, csv_dir):
         if filename.endswith(".json"):
             json_file = os.path.join(json_dir, filename)
             csv_file = os.path.join(csv_dir, filename.replace(".json", ".csv"))
-
             convert_json_to_csv(json_file, csv_file)
+
             logger.info(f'Fichier {filename} converti avec succès en csv.')
 
-def insert_data_from_csv(connection, csv_file, table_name):
+def insert_data_from_csv(engine, csv_file, table_name):
     try:
         data = pd.read_csv(csv_file)
-        cursor = connection.cursor()
-
-        # Vérifier que les colonnes du CSV correspondent à celles de la table
-        cols = ",".join(str(i) for i in data.columns.tolist())
-        placeholders = ', '.join(['%s'] * len(data.columns))
-
-        for i, row in data.iterrows():
-            sql = f"INSERT INTO {table_name} ({cols}) VALUES ({placeholders})"
-            cursor.execute(sql, tuple(row))
-
-        connection.commit()
-        logger.info(f'{len(data)} lignes insérées dans la table {table_name}')
-
-    except pymysql.MySQLError as e:
-        logger.error(f'Erreur lors de l\'insertion des données : {e}')
-        connection.rollback()
+        
+        # Insérer les données en utilisant SQLAlchemy pour la gestion automatique des transactions
+        with engine.begin() as connection:
+            data.to_sql(table_name, con=connection, if_exists='append', index=False)
+            logger.info(f'{len(data)} lignes insérées dans la table {table_name}')
+    
+    except SQLAlchemyError as e:
+        logger.error(f'Erreur lors de l\'insertion des données avec SQLAlchemy : {e}')
     except Exception as e:
         logger.error(f'Erreur lors de l\'insertion des données : {e}')
-        connection.rollback()
-    finally:
-        cursor.close()
 
-def close_connection(connection):
-    if connection:
-        connection.close()
+def close_engine(engine):
+    if engine:
+        engine.dispose()
         logger.info('Connexion SQL fermée.')

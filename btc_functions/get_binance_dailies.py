@@ -27,13 +27,13 @@ def request_data(url, endpoint, params):
     else:
         logger.error(f"Erreur de requête HTTP : {response.status_code}")
         return None 
-
+  
 def get_data_from_binance(endpoint):
     url = "https://api.binance.com"
     endpoint = "/api/v3/" + endpoint
     
     now = datetime.now()
-    yesterday = now - timedelta(days=1)
+    yesterday = now - timedelta(days=5)
     start_yesterday = datetime(yesterday.year, yesterday.month, yesterday.day, 0, 0, 0)
     end_yesterday = datetime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59)
 

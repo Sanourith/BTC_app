@@ -9,19 +9,28 @@ import btc_functions.database_functions as db_functions
 logger = getLogger(__name__)
 
 def main():
+    # Configurer le logger
     setup_logger()
+    
     json_dir = "/home/sanou/BTC/data/1_raw"
     csv_dir = "/home/sanou/BTC/data/1_raw"
     interim_dir = "/home/sanou/BTC/data/2_interim"
+
+    os.makedirs(csv_dir, exist_ok=True)
+    os.makedirs(interim_dir, exist_ok=True)
+    
     # Charger les variables d'environnement
     load_dotenv('/home/sanou/BTC/env/private.env')
-    # Créer la connexion à la base de données
-    connection = db_functions.create_connection()
-    if connection:
+    
+    # Créer l'engine de connexion à la base de données
+    engine = db_functions.create_connection()
+    
+    if engine:
         try:
             # Conversion des fichiers .json en .csv
             db_functions.convert_all_json_to_csv(json_dir, csv_dir)
             logger.info('Conversion des fichiers .json terminée avec succès')
+            
             # Déplacement des fichiers json pour éviter un double traitement
             for json_file in glob.glob(os.path.join(json_dir, "prices_BTC_KLINES*.json")):
                 destination = os.path.join(interim_dir, os.path.basename(json_file))
@@ -30,18 +39,20 @@ def main():
 
             # Insertion des données CSV dans la base de données
             for csv_file in glob.glob(os.path.join(csv_dir, "prices_BTC_KLINES*.csv")):
-                db_functions.insert_data_from_csv(connection, csv_file, "klines")
+                db_functions.insert_data_from_csv(engine, csv_file, "klines")
                 logger.info(f'Données {csv_file} enregistrées dans la base de données.')
-                if not os.path.exists(interim_dir):
-                    os.makedirs(interim_dir)
+                
                 # Déplacement des fichiers insérés en base de données dans 2_interim
                 destination = os.path.join(interim_dir, os.path.basename(csv_file))
                 shutil.move(csv_file, destination)
                 logger.info(f'Fichier {csv_file} déplacé vers {destination}.')
+        
         except Exception as e:
-            logger.error(f"Erreur lors de l'insertion des données : {e}")
+            logger.error(f"Erreur lors du traitement des fichiers : {e}")
+        
         finally:
-            db_functions.close_connection(connection)
+            # Fermer l'engine SQLAlchemy
+            db_functions.close_engine(engine)
     else:
         logger.error('Erreur de connexion à la base de données')
 
