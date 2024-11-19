@@ -1,6 +1,6 @@
-import os 
-import json 
-import requests 
+import os
+import json
+import requests
 from datetime import datetime, timedelta
 from logging import getLogger
 
@@ -8,16 +8,18 @@ logger = getLogger(__name__)
 
 # Les endpoints utilisables : klines, ticker/24h
 
+
 def data_to_json(data, file, start_yesterday):
     if data:
-        file_path = f"/home/sanou/BTC/data/1_raw/{file}_{start_yesterday}.json"
+        file_path = f"/home/sanou/BTC_app/data/1_raw/{file}_{start_yesterday}.json"
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
         with open(file_path, "w") as f:
             json.dump(data, f, indent=4)
         logger.info(f"Données enregistrées dans le fichier {file_path}.")
     else:
-        logger.warning(f"Erreur sur l'enregistrement de la requête, pas de données.")
+        logger.warning("Erreur sur l'enregistrement de la requête, pas de données.")
+
 
 def request_data(url, endpoint, params):
     full_endpoint = url + endpoint
@@ -26,12 +28,13 @@ def request_data(url, endpoint, params):
         return response.json()
     else:
         logger.error(f"Erreur de requête HTTP : {response.status_code}")
-        return None 
-  
+        return None
+
+
 def get_data_from_binance(endpoint):
     url = "https://api.binance.com"
     endpoint = "/api/v3/" + endpoint
-    
+
     now = datetime.now()
     yesterday = now - timedelta(days=5)
     start_yesterday = datetime(yesterday.year, yesterday.month, yesterday.day, 0, 0, 0)
@@ -42,33 +45,32 @@ def get_data_from_binance(endpoint):
 
     if endpoint == "/api/v3/klines":
         params = {
-            'symbol': 'BTCUSDT',
-            'interval': '5m', #intervalle d'espacement pour revoir les chiffres
-            'startTime': start_timestamp,
-            'endTime': end_timestamp,
-            'limit': 1000
+            "symbol": "BTCUSDT",
+            "interval": "5m",  # intervalle d'espacement pour revoir les chiffres
+            "startTime": start_timestamp,
+            "endTime": end_timestamp,
+            "limit": 1000,
         }
         file = "prices_BTC_KLINES"
 
     elif endpoint == "/api/v3/ticker/24hr":
-        params = {
-            'symbol': 'BTCUSDT'
-        } 
+        params = {"symbol": "BTCUSDT"}
         file = "prices_BTC_24h"
 
     elif endpoint == "/api/v3/ticker/bookTicker":
-        params ={
-            'symbol': 'BTCUSDT'
-        }
+        params = {"symbol": "BTCUSDT"}
         file = "bookticker"
 
     else:
-        logger.error(message:= f'Endpoint non utilisable ({endpoint}), utiliser "klines" ou "ticker/24h".')
+        logger.error(
+            message := f'Non utilisable ({endpoint}), seuls "klines" ou "ticker/24h".'
+        )
         raise ValueError(message)
-    
+
     data = request_data(url, endpoint, params)
     if data:
         data_to_json(data, file, start_yesterday)
+
 
 # Response_type Klines :
 # [

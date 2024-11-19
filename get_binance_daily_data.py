@@ -1,5 +1,5 @@
 from btc_functions.get_binance_dailies import get_data_from_binance
-from btc_functions.logger_config import setup_logger
+from BTC_app.btc_functions.logging.logger_config import setup_logger
 import logging
 
 logger = logging.getLogger(__name__)

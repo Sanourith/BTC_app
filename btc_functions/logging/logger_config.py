@@ -1,7 +1,7 @@
 import logging
 import os
 
-path_to_log = "/home/sanou/BTC/logs"
+path_to_log = "/home/sanou/BTC_app/logs"
 os.makedirs(path_to_log, exist_ok=True)
 
 def setup_logger(name = "logs.log"):
