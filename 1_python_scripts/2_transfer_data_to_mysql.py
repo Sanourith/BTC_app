@@ -1,10 +1,10 @@
 from logging import getLogger
-from BTC_app.btc_functions.logging.logger_config import setup_logger
+from btc_functions.logging.logger_config import setup_logger
 import os
 import glob
 import shutil
 from dotenv import load_dotenv
-import BTC_app.btc_functions.database.mysql as db_functions
+import btc_functions.database.mysql as db_functions
 
 logger = getLogger(__name__)
 
@@ -13,15 +13,15 @@ def main():
     # Configurer le logger
     setup_logger()
 
-    json_dir = "/home/sanou/BTC/data/1_raw"
-    csv_dir = "/home/sanou/BTC/data/1_raw"
-    interim_dir = "/home/sanou/BTC/data/2_interim"
+    json_dir = "/home/sanou/BTC_app/data/1_raw"
+    csv_dir = "/home/sanou/BTC_app/data/1_raw"
+    interim_dir = "/home/sanou/BTC_app/data/2_interim"
 
     os.makedirs(csv_dir, exist_ok=True)
     os.makedirs(interim_dir, exist_ok=True)
 
     # Charger les variables d'environnement
-    load_dotenv("/home/sanou/BTC/env/private.env")
+    load_dotenv("/home/sanou/BTC_app/env/private.env")
 
     # Créer l'engine de connexion à la base de données
     engine = db_functions.create_connection()

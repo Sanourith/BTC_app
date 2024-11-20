@@ -1,4 +1,4 @@
-# Objectifs du projet :
+# Objectifs du projet : (WIP)
 
 ## Récolter deux types de données:  
 
