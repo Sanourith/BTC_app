@@ -3,7 +3,6 @@ import json
 import pymysql
 import pandas as pd
 from logging import getLogger
-from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -95,8 +94,6 @@ def insert_data_from_csv(engine, csv_file, table_name):
 
     except SQLAlchemyError as e:
         logger.error(f"Erreur lors de l'insertion des données avec SQLAlchemy : {e}")
-    except Exception as e:
-        logger.error(f"Erreur lors de l'insertion des données : {e}")
 
 
 def close_engine(engine):

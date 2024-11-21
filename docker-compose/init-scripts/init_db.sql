@@ -18,27 +18,27 @@ CREATE TABLE klines (
     PRIMARY KEY (kline_open_time)                -- Définir la clé primaire comme le timestamp d'ouverture du kline
 );
 
-CREATE TABLE ticker_24h (
+CREATE TABLE ticker24h (
     symbol VARCHAR(10),                          -- Symbole de la paire de trading (ex: BTCUSDT)
-    price_change DECIMAL(18, 8),                 -- Variation de prix
-    price_change_percent DECIMAL(18, 6),         -- Pourcentage de variation
-    weighted_avg_price DECIMAL(18, 8),           -- Prix moyen pondéré
-    prev_close_price DECIMAL(18, 8),             -- Prix de clôture précédent
-    last_price DECIMAL(18, 8),                   -- Dernier prix
-    last_qty DECIMAL(24, 8),                     -- Dernière quantité échangée
-    bid_price DECIMAL(18, 8),                    -- Prix d'achat (bid)
-    bid_qty DECIMAL(24, 8),                      -- Quantité en bid
-    ask_price DECIMAL(18, 8),                    -- Prix de vente (ask)
-    ask_qty DECIMAL(24, 8),                      -- Quantité en ask
-    open_price DECIMAL(18, 8),                   -- Prix d'ouverture des dernières 24h
-    high_price DECIMAL(18, 8),                   -- Prix le plus haut des dernières 24h
-    low_price DECIMAL(18, 8),                    -- Prix le plus bas des dernières 24h
+    priceChange DECIMAL(18, 8),                  -- Variation de prix
+    priceChangePercent DECIMAL(18, 6),           -- Pourcentage de variation
+    weightedAvgPrice DECIMAL(18, 8),             -- Prix moyen pondéré
+    prevClosePrice DECIMAL(18, 8),               -- Prix de clôture précédent
+    lastPrice DECIMAL(18, 8),                    -- Dernier prix
+    lastQty DECIMAL(24, 8),                      -- Dernière quantité échangée
+    bidPrice DECIMAL(18, 8),                     -- Prix d'achat (bid)
+    bidQty DECIMAL(24, 8),                       -- Quantité en bid
+    askPrice DECIMAL(18, 8),                     -- Prix de vente (ask)
+    askQty DECIMAL(24, 8),                       -- Quantité en ask
+    openPrice DECIMAL(18, 8),                    -- Prix d'ouverture des dernières 24h
+    highPrice DECIMAL(18, 8),                    -- Prix le plus haut des dernières 24h
+    lowPrice DECIMAL(18, 8),                     -- Prix le plus bas des dernières 24h
     volume DECIMAL(24, 8),                       -- Volume total échangé
-    quote_volume DECIMAL(24, 8),                 -- Volume total échangé en quote asset
-    open_time BIGINT,                            -- Timestamp d'ouverture des dernières 24h
-    close_time BIGINT,                           -- Timestamp de clôture des dernières 24h
-    first_trade_id INT,                          -- Premier trade ID
-    last_trade_id INT,                           -- Dernier trade ID
-    trade_count INT,                             -- Nombre total de trades
-    PRIMARY KEY (symbol)                         -- Définir la clé primaire comme le symbole de la paire
+    quoteVolume DECIMAL(24, 8),                  -- Volume total échangé en quote asset
+    openTime BIGINT,                             -- Timestamp d'ouverture des dernières 24h
+    closeTime BIGINT,                            -- Timestamp de clôture des dernières 24h
+    firstId INT,                                 -- Premier trade ID
+    lastId INT,                                  -- Dernier trade ID
+    count INT,                                   -- Nombre total de trades
+    PRIMARY KEY (open_time)                      -- Définir la clé primaire comme le symbole de la paire
 );

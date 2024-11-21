@@ -11,6 +11,8 @@ logger = getLogger(__name__)
 
 def data_to_json(data, file, start_yesterday):
     if data:
+        raw_data = "/home/sanou/BTC_app/data/1_raw/"
+        os.makedirs(raw_data, exist_ok=True)
         file_path = f"/home/sanou/BTC_app/data/1_raw/{file}_{start_yesterday}.json"
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
@@ -36,7 +38,7 @@ def get_data_from_binance(endpoint):
     endpoint = "/api/v3/" + endpoint
 
     now = datetime.now()
-    yesterday = now - timedelta(days=5)
+    yesterday = now - timedelta(days=1)
     start_yesterday = datetime(yesterday.year, yesterday.month, yesterday.day, 0, 0, 0)
     end_yesterday = datetime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59)
 
@@ -57,9 +59,9 @@ def get_data_from_binance(endpoint):
         params = {"symbol": "BTCUSDT"}
         file = "prices_BTC_24h"
 
-    elif endpoint == "/api/v3/ticker/bookTicker":
-        params = {"symbol": "BTCUSDT"}
-        file = "bookticker"
+    # elif endpoint == "/api/v3/ticker/bookTicker":
+    #     params = {"symbol": "BTCUSDT"}
+    #     file = "bookticker"
 
     else:
         logger.error(
