@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def main():
     setup_logger()
-    endpoints = ["klines", "ticker/24hr"]  # "ticker/bookTicker"
+    endpoints = ["klines", "ticker/24hr", "ticker/tradingDay"]  # ticker/tradingDay
     for endpoint in endpoints:
         get_data_from_binance(endpoint)
         logger.info(f"Données ajoutées depuis la fonction pour {endpoint}")

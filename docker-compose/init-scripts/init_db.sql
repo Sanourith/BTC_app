@@ -37,8 +37,27 @@ CREATE TABLE ticker24h (
     quoteVolume DECIMAL(24, 8),                  -- Volume total échangé en quote asset
     openTime BIGINT,                             -- Timestamp d'ouverture des dernières 24h
     closeTime BIGINT,                            -- Timestamp de clôture des dernières 24h
-    firstId INT,                                 -- Premier trade ID
-    lastId INT,                                  -- Dernier trade ID
+    firstId BIGINT,                                 -- Premier trade ID
+    lastId BIGINT,                                  -- Dernier trade ID
     count INT,                                   -- Nombre total de trades
-    PRIMARY KEY (open_time)                      -- Définir la clé primaire comme le symbole de la paire
+    PRIMARY KEY (openTime)                       -- Définir la clé primaire comme le symbole de la paire
+);
+
+CREATE TABLE daily (
+    symbol VARCHAR(10),                          -- Symbole de la paire de trading (ex: BTCUSDT)
+    priceChange DECIMAL(18, 8),                  -- Variation absolue du prix sur une période
+    priceChangePercent DECIMAL(18, 8),           -- Variation relative du prix en pourcentage
+    weightedAvgPrice DECIMAL(18, 8),             -- Prix moyen pondéré sur la période
+    openPrice DECIMAL(18, 8),                    -- Prix d'ouverture de la période
+    highPrice DECIMAL(18, 8),                    -- Prix le plus haut atteint durant la période
+    lowPrice DECIMAL(18, 8),                     -- Prix le plus bas atteint durant la période
+    lastPrice DECIMAL(18, 8),                    -- Dernier prix enregistré à la clôture
+    volume DECIMAL(18, 8),                       -- Volume total échangé durant la période
+    quoteVolume DECIMAL(18, 8),                  -- Volume total échangé exprimé en asset quote
+    openTime BIGINT,                             -- Timestamp indiquant le début de la période (en millisecondes)
+    closeTime BIGINT,                            -- Timestamp indiquant la fin de la période (en millisecondes)
+    firstId BIGINT,                                 -- Identifiant du premier trade enregistré durant la période
+    lastId BIGINT,                                  -- Identifiant du dernier trade enregistré durant la période
+    count INT,                                   -- Nombre total de trades durant la période
+    PRIMARY KEY (openTime)                       -- Définir la clé primaire comme le timestamp d'ouverture de la période
 );

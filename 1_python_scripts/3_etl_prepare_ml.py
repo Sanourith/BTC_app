@@ -1,71 +1,53 @@
 from logging import getLogger
-from datetime import datetime
 import pandas as pd
-from btc_functions.logging.logger_config import setup_logger
-# import os
 from dotenv import load_dotenv
 import btc_functions.database.mysql as db_functions
+from btc_functions.logging.logger_config import setup_logger
+
+# import os
 
 logger = getLogger(__name__)
 
 
-# def round_numbers(file):
-#     return file
-
-
-def reverse_timestamp(df: pd.DataFrame, col1: str, col2: str = None) -> pd.DataFrame:
-    """Attention, la fonction traite max 2 colonnes
+def main(table_name, col1, col2=None) -> pd.DataFrame:
+    """Récupère une table SQL, applique reverse_timestamp sur les cols BIGINT spécifiées
+       et retourne le DataFrame.
 
     Args:
-        df (pd.DataFrame): df
-        col1 (str): nom de la col à transformer
-        col2 (str, optional): nom de la col2 à transformer. Defaults to None.
-
-    Returns:
-        pd.DataFrame: df
+        engine (connection): engine pymysql
+        table_name (sql_table): nom de la table cible (type BIGINT / timestamp)
+        col1 (table_column): table à transcrire
+        col2 (table_column2, optional): 2e colonne à transcrire. Defaults to None.
     """
-    cols = [col1] if col2 is None else [col1, col2]
-    df[cols] = df[cols].applymap(lambda x: datetime.fromtimestamp(x / 1000))
-    return df
-    # df["kline_open_time"] = df["kline_open_time"].apply(
-    #     lambda x: datetime.fromtimestamp(x / 1000)
-    # )
-    # df["kline_close_time"] = df["kline_close_time"].apply(
-    #     lambda x: datetime.fromtimestamp(x / 1000)
-    # )
-    # return df
-
-
-def get_btc_data_from_db(table_name):
     setup_logger()
+    engine = db_functions.create_connection()
+    query = f"SELECT * FROM {table_name}"
 
-    load_dotenv("/home/sanou/BTC_app/env/private.env")
+    df = pd.read_sql_query(query, engine)
+    df = db_functions.reverse_timestamp(df, col1, col2)
 
-    try:
-        engine = db_functions.create_connection()
-        query = f"SELECT * FROM {table_name}"
-        df = pd.read_sql_query(query, engine)
-        logger.info(f"Requête {query} récupérée en DataFrame. ETL en cours...")
-
-        col1 = "kline_open_time"
-        col2 = "kline_close_time"
-        df = reverse_timestamp(df, col1, col2)
-
-    # TODO : arrondir les nombres ? -non
-    # TODO : ajouter des colonnes indicateurs
-
-    except Exception as e:
-        logger.error(f"Erreur de connexion à la base de données. {e}")
+    logger.info(f"Table {table_name} traitée avec succès.")
     return df
 
 
-def prepare_ml():
-    sql_table = "klines"
-    df = get_btc_data_from_db(sql_table)
+if __name__ == "__main__":
+    load_dotenv("/home/sanou/BTC_app/env/private.env")
+    df_klines = main("klines", "kline_open_time", "kline_close_time")
+    df_24 = main("ticket24h", "openTime", "closeTime")
 
-    # ma target sera une colonne qui indique si 
-    df["price_up"] = df[df[]]
-    return X, y
+    logger.info(df_klines.head(2))
+    logger.info("\n")
+    logger.info(df_24.head(2))
+
+
+# def prepare_ml():
+#     sql_table = "klines"
+#     df = get_btc_data_from_db(sql_table)
+
+#     # ma target sera une colonne qui indique si
+#     df["price_up"] = df[df[]]
+
+#     return X, y
 
 
 #

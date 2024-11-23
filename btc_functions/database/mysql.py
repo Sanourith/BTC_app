@@ -2,6 +2,7 @@ import os
 import json
 import pymysql
 import pandas as pd
+from datetime import datetime
 from logging import getLogger
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
@@ -93,10 +94,28 @@ def insert_data_from_csv(engine, csv_file, table_name):
             logger.info(f"{len(data)} lignes insérées dans la table {table_name}")
 
     except SQLAlchemyError as e:
-        logger.error(f"Erreur lors de l'insertion des données avec SQLAlchemy : {e}")
+        logger.error(
+            f"Erreur lors de l'insertion du fichier {csv_file} avec SQLAlchemy : {e}"
+        )
 
 
 def close_engine(engine):
     if engine:
         engine.dispose()
         logger.info("Connexion SQL fermée.")
+
+
+def reverse_timestamp(df: pd.DataFrame, col1: str, col2: str = None) -> pd.DataFrame:
+    """Attention, la fonction traite max 2 colonnes
+
+    Args:
+        df (pd.DataFrame): df
+        col1 (str): nom de la col à transformer
+        col2 (str, optional): nom de la col2 à transformer. Defaults to None.
+
+    Returns:
+        pd.DataFrame: df
+    """
+    cols = [col1] if col2 is None else [col1, col2]
+    df[cols] = df[cols].map(lambda x: datetime.fromtimestamp(x / 1000))
+    return df

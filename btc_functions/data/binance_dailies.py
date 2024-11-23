@@ -55,10 +55,13 @@ def get_data_from_binance(endpoint):
         }
         file = "prices_BTC_KLINES"
 
+    elif endpoint == "/api/v3/ticker/tradingDay":
+        params = {"symbol": "BTCUSDT"}
+        file = "prices_BTC_daily"
+
     elif endpoint == "/api/v3/ticker/24hr":
         params = {"symbol": "BTCUSDT"}
         file = "prices_BTC_24h"
-
     # elif endpoint == "/api/v3/ticker/bookTicker":
     #     params = {"symbol": "BTCUSDT"}
     #     file = "bookticker"
