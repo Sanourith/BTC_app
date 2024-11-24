@@ -167,8 +167,8 @@ def train_and_select_best_models(merge_df: pd.DataFrame) -> str:
     accuracy = (y_test == y_pred_binary).mean()
     logger.info(f"Accuracy of best model ({best_model_name}): {accuracy:.4f}")
 
-    # predictions_df = pd.DataFrame({"Actual": y_test, "Predicted": y_pred_binary})
-    # predictions_df.to_csv("/home/sanou/BTC_app/models_ml/predictions.csv", index=False)
-    # logger.info("Predictions saved in /home/sanou/BTC_app/models_ml/predictions.csv")
+    predictions_df = pd.DataFrame({"Actual": y_test, "Predicted": y_pred_binary})
+    predictions_df.to_csv("/home/sanou/BTC_app/models_ml/predictions.csv", index=False)
+    logger.info("Predictions saved in /home/sanou/BTC_app/models_ml/predictions.csv")
 
     return best_model_name
