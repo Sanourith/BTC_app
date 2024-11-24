@@ -5,6 +5,9 @@
 # Logs
 /logs/
 
+# models
+models_ml/
+
 # Mac OS-specific storage files
 .DS_Store
 
@@ -24,6 +27,7 @@ __pycache__/
 
 # C extensions
 *.so
+*.csv
 
 # Distribution / packaging
 .Python

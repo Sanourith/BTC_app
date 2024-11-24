@@ -5,7 +5,7 @@ import sys
 import glob
 import shutil
 from dotenv import load_dotenv
-import btc_functions.database.mysql as db_functions
+import btc_functions.load_database.mysql as db_functions
 
 logger = getLogger(__name__)
 
@@ -20,7 +20,7 @@ def move_to_failed(file_path, failed_dir):
     json_file_path = os.path.splitext(file_path)[0] + "json"
     failed_destination_json = os.path.join(failed_dir, os.path.basename(json_file_path))
     failed_destination_csv = os.path.join(failed_dir, os.path.basename(file_path))
-    
+
     # json_file_path = os.path.splitext(file_path)[0] + "json"
     if os.path.exists(json_file_path):
         shutil.move(json_file_path, failed_destination_json)

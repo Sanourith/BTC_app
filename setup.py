@@ -12,7 +12,8 @@ setup(
     ],
     # entry_points={
     #     'console_scripts': [
-    #         'get_binance_data = btc_functions.get_binance_data:main', # Exemple de point d'entrée
+    #         'get_binance_data = btc_functions.get_binance_data:main',
+    # Exemple de point d'entrée
     #     ]
     # },
 )

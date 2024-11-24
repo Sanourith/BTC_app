@@ -1,4 +1,4 @@
-#! /bin/bash
+cd#! /bin/bash
 
 echo "Extraction des données J-1 sur Binance, pour les données suivantes :"
 echo "Open price, High price, Low price, Close price, Volume, Number of Trades, Taker assets buy volume"
