@@ -37,8 +37,8 @@ CREATE TABLE ticker24h (
     quoteVolume DECIMAL(24, 8),                  -- Volume total échangé en quote asset
     openTime BIGINT,                             -- Timestamp d'ouverture des dernières 24h
     closeTime BIGINT,                            -- Timestamp de clôture des dernières 24h
-    firstId BIGINT,                                 -- Premier trade ID
-    lastId BIGINT,                                  -- Dernier trade ID
+    firstId BIGINT,                              -- Premier trade ID
+    lastId BIGINT,                               -- Dernier trade ID
     count INT,                                   -- Nombre total de trades
     PRIMARY KEY (openTime)                       -- Définir la clé primaire comme le symbole de la paire
 );
@@ -56,8 +56,8 @@ CREATE TABLE daily (
     quoteVolume DECIMAL(18, 8),                  -- Volume total échangé exprimé en asset quote
     openTime BIGINT,                             -- Timestamp indiquant le début de la période (en millisecondes)
     closeTime BIGINT,                            -- Timestamp indiquant la fin de la période (en millisecondes)
-    firstId BIGINT,                                 -- Identifiant du premier trade enregistré durant la période
-    lastId BIGINT,                                  -- Identifiant du dernier trade enregistré durant la période
+    firstId BIGINT,                              -- Identifiant du premier trade enregistré durant la période
+    lastId BIGINT,                               -- Identifiant du dernier trade enregistré durant la période
     count INT,                                   -- Nombre total de trades durant la période
     PRIMARY KEY (openTime)                       -- Définir la clé primaire comme le timestamp d'ouverture de la période
 );
