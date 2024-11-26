@@ -114,7 +114,7 @@ def insert_data_from_csv(engine, csv_file: str, table_name: str) -> None:
             data.to_sql(table_name, con=connection, if_exists="append", index=False)
             logger.info(f"Inserted {len(data)} rows into the table {table_name}")
     except SQLAlchemyError as e:
-        logger.error(f"Error inserting data from {csv_file} into {table_name}")
+        logger.error(f"Error inserting data from {csv_file} into {table_name}: {e}")
 
 
 def close_engine(engine):
