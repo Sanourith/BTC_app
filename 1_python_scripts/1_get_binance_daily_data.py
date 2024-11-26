@@ -3,7 +3,7 @@
 # # Ajouter le répertoire parent au PYTHONPATH
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from btc_functions.extract_data.binance_dailies import get_data_from_binance
+from BTC_app.btc_functions.extract_data.binance_dailies import get_data_from_binance
 from btc_functions.logging.logger_config import setup_logger
 import logging
 
@@ -11,11 +11,18 @@ logger = logging.getLogger(__name__)
 
 
 def main():
+    """
+    Main function to fetch data from Binance API for specified endpoints.
+
+    This function initializes the logger,iterates through list of Binance API endpoints,
+    and calls the `get_data_from_binance` function for each endpoint.
+    Logs are generated for each operation to provide status updates.
+    """
     setup_logger()
     endpoints = ["klines", "ticker/24hr", "ticker/tradingDay"]  # ticker/tradingDay
     for endpoint in endpoints:
         get_data_from_binance(endpoint)
-        logger.info(f"Données ajoutées depuis la fonction pour {endpoint}")
+        logger.info(f"Data successfully fetched and saved for endpoint: {endpoint}")
 
 
 if __name__ == "__main__":
