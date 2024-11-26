@@ -4,7 +4,7 @@ import os
 import glob
 import shutil
 from dotenv import load_dotenv
-import btc_functions.load_database.mysql as db_functions
+import BTC_app.btc_functions.load_database.deprecated_mysql as db_functions
 
 logger = getLogger(__name__)
 

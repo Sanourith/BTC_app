@@ -5,7 +5,7 @@ import sys
 import glob
 import shutil
 from dotenv import load_dotenv
-import btc_functions.load_database.mysql as db_functions
+import BTC_app.btc_functions.load_database.mysql as db_functions
 
 logger = getLogger(__name__)
 
@@ -49,7 +49,7 @@ def main():
     engine = db_functions.create_connection()
 
     if not engine:
-        logger.error("Connexion à la base de données impossible. Arrêt du script.")
+        logger.error("Database connection failed. Exiting script.")
         sys.exit(1)
 
     db_functions.convert_all_json_to_csv(json_dir, csv_dir)
@@ -70,7 +70,7 @@ def main():
                 logger.warning(
                     f"Fichier ignoré : {file_path} (doc non -klines, daily ou 24h)"
                 )
-                move_to_failed(file_path, failed_dir)
+                # move_to_failed(file_path, failed_dir)
                 continue
 
             db_functions.insert_data_from_csv(engine, file_path, table_name)
@@ -84,7 +84,7 @@ def main():
             logger.error(
                 f"Erreur lors du traitement de {file_path} : {e}", exc_info=True
             )
-            move_to_failed(file_path, failed_dir)
+            # move_to_failed(file_path, failed_dir)
 
     for file_path in glob.glob(os.path.join(csv_dir, "*.json")):
         destination = os.path.join(interim_dir, os.path.basename(file_path))

@@ -1,4 +1,4 @@
-cd#! /bin/bash
+#! /bin/bash
 
 echo "Extraction des données J-1 sur Binance, pour les données suivantes :"
 echo "Open price, High price, Low price, Close price, Volume, Number of Trades, Taker assets buy volume"
@@ -17,7 +17,7 @@ echo "Extraction des données du jour terminée."
 
 wait 10
 
-python3 /home/sanou/BTC_app/1_python_scripts/2_new_transfert_data.py
+python3 /home/sanou/BTC_app/1_python_scripts/2_transfert_data.py
 echo "Transfert des données vers MySQL effectué."
 
 wait 10
