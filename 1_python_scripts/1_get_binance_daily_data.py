@@ -3,7 +3,7 @@
 # # Ajouter le répertoire parent au PYTHONPATH
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from BTC_app.btc_functions.extract_data.binance_dailies import get_data_from_binance
+from btc_functions.extract_data.binance_dailies import get_data_from_binance
 from btc_functions.logging.logger_config import setup_logger
 import logging
 
