@@ -80,7 +80,7 @@ def convert_json_to_csv(json_file: str, csv_file: str) -> None:
         logger.error(f"Error during conversion: {e}")
 
 
-def conver_all_json_to_csv(json_dir: str, csv_dir: str) -> None:
+def convert_all_json_to_csv(json_dir: str, csv_dir: str) -> None:
     """
     Converts all JSON files in a directory to CSV files.
 

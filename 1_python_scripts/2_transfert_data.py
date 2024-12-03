@@ -32,7 +32,7 @@ def main():
         sys.exit(1)
 
     try:
-        db_functions.conver_all_json_to_csv(json_dir, csv_dir)
+        db_functions.convert_all_json_to_csv(json_dir, csv_dir)
         logger.info("Conversion of .json files to .csv completed successfully.")
 
         for file_path in glob.glob(os.path.join(csv_dir, "*.csv")):

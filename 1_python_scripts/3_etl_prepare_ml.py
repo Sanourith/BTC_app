@@ -15,7 +15,7 @@ def main():
     df_klines = get_df_change_timestamp("klines", "kline_open_time", "kline_close_time")
     df_daily = get_df_change_timestamp("daily", "openTime", "closeTime")
 
-    logger.info("Récupération des DataFrames Klines & 24hr. Préparation merge")
+    logger.info("DataFrames Klines & 24hr recuperation. Merging preparation.")
 
     df_klines = bm.format_time_ml(df_klines, "kline_open_time")
     df_daily = bm.format_time_ml(df_daily, "openTime")

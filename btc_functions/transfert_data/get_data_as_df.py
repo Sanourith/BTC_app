@@ -1,7 +1,8 @@
 import pandas as pd
+from datetime import datetime
 import logging
 from ..logging.logger_config import setup_logger
-from ..load_database import deprecated_mysql as db_functions
+from ..load_database import mysql as db_functions
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ def get_df_change_timestamp(table_name, col1, col2=None) -> pd.DataFrame:
     query = f"SELECT * FROM {table_name}"
 
     df = pd.read_sql_query(query, engine)
-    df = db_functions.reverse_timestamp(df, col1, col2)
+    df = reverse_timestamp(df, col1, col2)
 
     logger.info(f"Table {table_name} traitée avec succès.")
     return df

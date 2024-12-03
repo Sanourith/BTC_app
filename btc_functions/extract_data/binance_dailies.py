@@ -36,6 +36,7 @@ def data_to_json(data: Any, filename: str) -> None:
             logger.error(f"Error saving data to {file_path}: {e}")
     else:
         logger.warning("No data to save.")
+    return
 
 
 def request_data(
@@ -62,7 +63,7 @@ def request_data(
         return None
 
 
-def get_data_from_binance(endpoint: str) -> None:
+def get_data_from_binance(endpoint: str, r_days: int = 1) -> None:
     """
     Fetch data from the Binance API and save it to a JSON file.
 
@@ -70,7 +71,7 @@ def get_data_from_binance(endpoint: str) -> None:
         endpoint (str): API endpoint to fetch data from.
     """
     now = datetime.now()
-    yesterday = now - timedelta(days=1)
+    yesterday = now - timedelta(days=r_days)
     start_yesterday = datetime(yesterday.year, yesterday.month, yesterday.day, 0, 0, 0)
     end_yesterday = datetime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59)
 
@@ -112,6 +113,7 @@ def get_data_from_binance(endpoint: str) -> None:
     data = request_data(endpoint, params=config["params"])
     if data:
         data_to_json(data, config["file"])
+    return
 
 
 # Response_type Klines :
