@@ -31,7 +31,6 @@ def main():
 
     best_model = bm.train_and_select_best_models(merge_df)
     logger.info(f"Best model : {best_model}")
-
     return
 
 

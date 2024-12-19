@@ -11,13 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    """
-    Main function to fetch data from Binance API for specified endpoints.
-
-    This function initializes the logger,iterates through list of Binance API endpoints,
-    and calls the `get_data_from_binance` function for each endpoint.
-    Logs are generated for each operation to provide status updates.
-    """
     setup_logger()
     endpoints = ["klines", "ticker/24hr", "ticker/tradingDay"]  # ticker/tradingDay
     for endpoint in endpoints:
