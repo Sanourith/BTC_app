@@ -25,7 +25,8 @@ def data_to_json(data: Any, filename: str) -> None:
         filename (str): file name (without directory)
     """
     if data:
-        file_path = os.path.join(BASE_DIR, f"{filename}.json")
+        date_str = datetime.now().strftime("%Y-%m-%d")
+        file_path = os.path.join(BASE_DIR, f"{filename}_{date_str}.json")
         verif_directory_exist(file_path)
 
         try:
