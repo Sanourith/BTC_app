@@ -10,20 +10,20 @@ cd /home/sanou/BTC_app/docker-compose
 
 docker compose up -d
 
-sleep 10
+sleep 5
 
 python3 /home/sanou/BTC_app/1_python_scripts/1_get_binance_daily_data.py
 echo "Extraction des données du jour terminée."
 
-sleep 10
+sleep 3
 
 python3 /home/sanou/BTC_app/1_python_scripts/2_transfert_data.py
 echo "Transfert des données vers MySQL effectué."
 
-sleep 10
+sleep 3
 
 docker compose down
 
-sleep 5
+sleep 2
 
 deactivate
