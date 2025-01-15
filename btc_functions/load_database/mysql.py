@@ -51,6 +51,10 @@ def convert_json_to_csv(json_file: str, csv_file: str) -> None:
     try:
         with open(json_file, "r") as file:
             data = json.load(file)
+
+        if not data:
+            raise ValueError("JSON file is empty or unsupported")
+
         if isinstance(data, dict):
             df = pd.DataFrame([data])
         elif isinstance(data, list):
