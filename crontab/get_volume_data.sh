@@ -22,6 +22,11 @@ echo "Transfert des données vers MySQL effectué."
 
 sleep 3
 
+python3 /home/sanou/BTC_app/1_python_scripts/3_etl_prepare_ml.py
+echo "Enregistrement des modèles terminée"
+
+sleep 3
+
 docker compose down
 
 sleep 2
