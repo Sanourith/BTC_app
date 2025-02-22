@@ -1,74 +1,65 @@
-# import sys
-# import os
-# # Ajouter le répertoire parent au PYTHONPATH
-# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
+from datetime import datetime, timedelta
 from btc_functions.extract_data.binance_dailies import get_data_from_binance
 from btc_functions.logging.logger_config import setup_logger
 import logging
+import os
+import glob
 
 logger = logging.getLogger(__name__)
 
 
+def rename_json_files_with_date():
+    """
+    Recherche et renomme les fichiers JSON sans date pour y ajouter la date d'hier.
+    """
+    yesterday = datetime.now() - timedelta(days=1)
+    date_str = yesterday.strftime("%Y%m%d")
+
+    # Dossier de base où sont stockés les fichiers
+    base_dir = os.getenv("BTC_APP_BASE_DIR", "/home/sanou/BTC_app/data/1_raw")
+
+    # Patterns à rechercher
+    patterns = [
+        "prices_BTC_KLINES.json",
+        "prices_BTC_24h.json",
+        "prices_BTC_daily.json",
+    ]
+
+    for pattern in patterns:
+        # Cherche les fichiers correspondant au pattern
+        path_pattern = os.path.join(base_dir, pattern)
+        matching_files = glob.glob(path_pattern)
+
+        for file_path in matching_files:
+            # Extraire le nom de base (sans extension)
+            file_dir = os.path.dirname(file_path)
+            file_name = os.path.basename(file_path)
+            base_name = file_name.replace(".json", "")
+
+            # Créer le nouveau nom avec la date
+            new_file_name = f"{base_name}_{date_str}.json"
+            new_file_path = os.path.join(file_dir, new_file_name)
+
+            # Renommer le fichier
+            try:
+                os.rename(file_path, new_file_path)
+                logger.info(f"Renamed {file_path} to {new_file_path}")
+            except Exception as e:
+                logger.error(f"Error renaming {file_path}: {e}")
+
+
 def main():
     setup_logger()
-    endpoints = ["klines", "ticker/24hr", "ticker/tradingDay"]  # ticker/tradingDay
+    endpoints = ["klines", "ticker/24hr", "ticker/tradingDay"]
     for endpoint in endpoints:
+        # Utilisez la fonction sans le nouveau paramètre
         get_data_from_binance(endpoint)
         logger.info(f"Data successfully fetched and saved for endpoint: {endpoint}")
+
+    # Après avoir récupéré toutes les données, renommer les fichiers pour ajouter la date
+    rename_json_files_with_date()
+    logger.info("File renaming completed")
 
 
 if __name__ == "__main__":
     main()
-
-# Response_type Klines :
-# [
-#   [
-#     1499040000000,      // Kline open time
-#     "0.01634790",       // Open price
-#     "0.80000000",       // High price
-#     "0.01575800",       // Low price
-#     "0.01577100",       // Close price
-#     "148976.11427815",  // Volume
-#     1499644799999,      // Kline Close time
-#     "2434.19055334",    // Quote asset volume
-#     308,                // Number of trades
-#     "1756.87402397",    // Taker buy base asset volume
-#     "28.46694368",      // Taker buy quote asset volume
-#     "0"                 // Unused field, ignore.
-#   ]
-# ]
-
-# Response_type 24h :
-# {
-#   "symbol": "BNBBTC",
-#   "priceChange": "-94.99999800",
-#   "priceChangePercent": "-95.960",
-#   "weightedAvgPrice": "0.29628482",
-#   "prevClosePrice": "0.10002000",
-#   "lastPrice": "4.00000200",
-#   "lastQty": "200.00000000",
-#   "bidPrice": "4.00000000",
-#   "bidQty": "100.00000000",
-#   "askPrice": "4.00000200",
-#   "askQty": "100.00000000",
-#   "openPrice": "99.00000000",
-#   "highPrice": "100.00000000",
-#   "lowPrice": "0.10000000",
-#   "volume": "8913.30000000",
-#   "quoteVolume": "15.30000000",
-#   "openTime": 1499783499040,
-#   "closeTime": 1499869899040,
-#   "firstId": 28385,   // First tradeId
-#   "lastId": 28460,    // Last tradeId
-#   "count": 76         // Trade count
-# }
-
-# Réponse bookTicker :
-# {
-#   "symbol": "LTCBTC",
-#   "bidPrice": "4.00000000",
-#   "bidQty": "431.00000000",
-#   "askPrice": "4.00000200",
-#   "askQty": "9.00000000"
-# }

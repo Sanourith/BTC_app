@@ -11,8 +11,8 @@ BASE_DIR = os.getenv("BTC_APP_BASE_DIR", "/home/sanou/BTC_app/data/1_raw")
 BINANCE_URL = "https://api.binance.com/api/v3/"
 
 
-def verif_directory_exists(path: str) -> None:
-    """Ensure the directory for a given path exists"""
+def verif_directory_exist(path: str) -> None:
+    """Ensure the directory for a given path exists."""
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
 
@@ -26,32 +26,23 @@ def data_to_json(data: Any, filename: str, date: datetime) -> None:
         date (datetime): date to use in the filename
     """
     if data:
-        date_str = date.strftime("%Y%m%d")
-
-        # Supprimer l'extension .json si elle existe déjà
-        if filename.lower().endswith(".json"):
-            base_name = filename[:-5]
-        else:
-            base_name = filename
-
-        # Construire le chemin complet avec la date
-        final_filename = f"{base_name}_{date_str}.json"
-        file_path = os.path.join(BASE_DIR, final_filename)
-
+        date_str = date.strftime("%Y-%m-%d")
+        file_path = os.path.join(BASE_DIR, f"{filename}_{date_str}.json")
+        print(file_path)
         logger.debug(f"Attempting to save file with path: {file_path}")
         logger.debug(f"BASE_DIR is: {BASE_DIR}")
-        logger.debug(f"Final filename is: {final_filename}")
+        logger.debug(f"Filename with date is: {filename}_{date_str}.json")
 
-        verif_directory_exists(file_path)
+        verif_directory_exist(file_path)
 
         try:
             with open(file_path, "w") as f:
                 json.dump(data, f, indent=4)
-                logger.info(f"Data saved to {file_path}")
+            logger.info(f"Data saved to {file_path}.")
         except (IOError, OSError) as e:
             logger.error(f"Error saving data to {file_path}: {e}")
     else:
-        logger.warning("No data to save")
+        logger.warning("No data to save.")
     return
 
 
@@ -75,24 +66,21 @@ def request_data(
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
-        logger.error(f"Http request error : {e}")
+        logger.error(f"HTTP request error: {e}")
         return None
 
 
-def get_data_from_binance(
-    endpoint: str, r_days: int = 1, use_today_for_filename: bool = True
-) -> None:
+def get_data_from_binance(endpoint: str, r_days: int = 1) -> None:
     """
     Fetch data from the Binance API and save it to a JSON file.
 
     Args:
         endpoint (str): API endpoint to fetch data from.
         r_days (int): number of days to go back (default: 1 for yesterday)
-        use_today_for_filename (bool): if True, use today's date for the filename
     """
     now = datetime.now()
     yesterday = now - timedelta(days=r_days)
-    logger.debug(f"Yesterday's date is :{yesterday}")
+    logger.debug(f"Yesterday's date is: {yesterday}")
 
     start_yesterday = datetime(yesterday.year, yesterday.month, yesterday.day, 0, 0, 0)
     end_yesterday = datetime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59)
@@ -128,16 +116,58 @@ def get_data_from_binance(
     if endpoint not in endpoint_mapping:
         logger.error(f"Unsupported endpoint : {endpoint}")
         raise ValueError(
-            f"Supported endpoints are : {', '.join(endpoint_mapping.keys())}"
+            f"Supported endpoints are: {', '.join(endpoint_mapping.keys())}"
         )
 
     config = endpoint_mapping[endpoint]
-    logger.debug(f"Using configuration : {config}")
+    logger.debug(f"Using configuration: {config}")
     data = request_data(endpoint, params=config["params"])
-
     if data:
-        # Utilisez now ou yesterday selon le paramètre
-        file_date = now if use_today_for_filename else yesterday
-        logger.debug(f"Using date {file_date} for filename")
-        data_to_json(data, config["file"], file_date)
-        return
+        # Explicitly log that we're passing the date
+        logger.debug(f"Passing date {yesterday} to data_to_json")
+        data_to_json(data, config["file"], yesterday)  # Pass yesterday's date
+    return
+
+
+# Response_type Klines :
+# [
+#   [
+#     1499040000000,      // Kline open time
+#     "0.01634790",       // Open price
+#     "0.80000000",       // High price
+#     "0.01575800",       // Low price
+#     "0.01577100",       // Close price
+#     "148976.11427815",  // Volume
+#     1499644799999,      // Kline Close time
+#     "2434.19055334",    // Quote asset volume
+#     308,                // Number of trades
+#     "1756.87402397",    // Taker buy base asset volume
+#     "28.46694368",      // Taker buy quote asset volume
+#     "0"                 // Unused field, ignore.
+#   ]
+# ]
+
+# Response_type 24h :
+# {
+#   "symbol": "BNBBTC",
+#   "priceChange": "-94.99999800",
+#   "priceChangePercent": "-95.960",
+#   "weightedAvgPrice": "0.29628482",
+#   "prevClosePrice": "0.10002000",
+#   "lastPrice": "4.00000200",
+#   "lastQty": "200.00000000",
+#   "bidPrice": "4.00000000",
+#   "bidQty": "100.00000000",
+#   "askPrice": "4.00000200",
+#   "askQty": "100.00000000",
+#   "openPrice": "99.00000000",
+#   "highPrice": "100.00000000",
+#   "lowPrice": "0.10000000",
+#   "volume": "8913.30000000",
+#   "quoteVolume": "15.30000000",
+#   "openTime": 1499783499040,
+#   "closeTime": 1499869899040,
+#   "firstId": 28385,   // First tradeId
+#   "lastId": 28460,    // Last tradeId
+#   "count": 76         // Trade count
+# }
