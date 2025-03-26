@@ -142,7 +142,7 @@ def train_and_select_best_models(merge_df: pd.DataFrame) -> str:
     }
 
     scores_models = {}
-    path_model_folder = "/home/sanou/BTC_app/models_ml"
+    path_model_folder = "/home/sanou/work/BTC_app/models_ml"
     os.makedirs(path_model_folder, exist_ok=True)
 
     for name, model in models.items():
@@ -168,7 +168,11 @@ def train_and_select_best_models(merge_df: pd.DataFrame) -> str:
     logger.info(f"Accuracy of best model ({best_model_name}): {accuracy:.4f}")
 
     predictions_df = pd.DataFrame({"Actual": y_test, "Predicted": y_pred_binary})
-    predictions_df.to_csv("/home/sanou/BTC_app/models_ml/predictions.csv", index=False)
-    logger.info("Predictions saved in /home/sanou/BTC_app/models_ml/predictions.csv")
+    predictions_df.to_csv(
+        "/home/sanou/work/BTC_app/models_ml/predictions.csv", index=False
+    )
+    logger.info(
+        "Predictions saved in /home/sanou/work/BTC_app/models_ml/predictions.csv"
+    )
 
     return best_model_name

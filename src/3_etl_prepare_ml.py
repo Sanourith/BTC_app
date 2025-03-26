@@ -35,11 +35,11 @@ def main():
 
 
 if __name__ == "__main__":
-    load_dotenv("/home/sanou/BTC_app/env/private.env")
+    load_dotenv("/home/sanou/work/BTC_app/env/private.env")
     main()
 
 
-# model = load("/home/sanou/BTC_app/models_ml/best_LinearRegression().pickle")
+# model = load("/home/sanou/work/BTC_app/models_ml/best_LinearRegression().pickle")
 
 # prediction = model.predict(df)[0]
 # logger.info(f"{prediction = }")

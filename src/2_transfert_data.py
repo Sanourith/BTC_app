@@ -13,15 +13,15 @@ def main():
     setup_logger()
 
     spe_directories = {
-        "json_dir": "/home/sanou/BTC_app/data/1_raw",
-        "csv_dir": "/home/sanou/BTC_app/data/1_raw",
-        "interim_dir": "/home/sanou/BTC_app/data/2_interim",
-        "failed_dir": "/home/sanou/BTC_app/data/5_failed",
+        "json_dir": "/home/sanou/work/BTC_app/data/1_raw",
+        "csv_dir": "/home/sanou/work/BTC_app/data/1_raw",
+        "interim_dir": "/home/sanou/work/BTC_app/data/2_interim",
+        "failed_dir": "/home/sanou/work/BTC_app/data/5_failed",
     }
-    json_dir = "/home/sanou/BTC_app/data/1_raw"
-    csv_dir = "/home/sanou/BTC_app/data/1_raw"
-    interim_dir = "/home/sanou/BTC_app/data/2_interim"
-    # failed_dir = "/home/sanou/BTC_app/data/5_failed"
+    json_dir = "/home/sanou/work/BTC_app/data/1_raw"
+    csv_dir = "/home/sanou/work/BTC_app/data/1_raw"
+    interim_dir = "/home/sanou/work/BTC_app/data/2_interim"
+    # failed_dir = "/home/sanou/work/BTC_app/data/5_failed"
 
     for name, dir in spe_directories.items():
         db_functions.setup_directories(dir)
@@ -56,5 +56,5 @@ def main():
 
 
 if __name__ == "__main__":
-    load_dotenv("/home/sanou/BTC_app/env/private.env")
+    load_dotenv("/home/sanou/work/BTC_app/env/private.env")
     main()
