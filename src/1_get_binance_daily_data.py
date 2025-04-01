@@ -16,7 +16,7 @@ def rename_json_files_with_date():
     date_str = yesterday.strftime("%Y%m%d")
 
     # Dossier de base où sont stockés les fichiers
-    base_dir = os.getenv("BTC_APP_BASE_DIR", "/home/sanou/work/BTC_app/data/1_raw")
+    base_dir = os.getenv("BTC_APP_BASE_DIR", "/home/sanou/BTC_app/data/1_raw")
 
     # Patterns à rechercher
     patterns = [

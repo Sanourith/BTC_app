@@ -12,17 +12,17 @@ docker compose up -d
 
 sleep 5
 
-python3 /home/sanou/work/BTC_app/src/1_get_binance_daily_data.py
+python3 /home/sanou/BTC_app/src/1_get_binance_daily_data.py
 echo "Extraction des données du jour terminée."
 
 sleep 3
 
-python3 /home/sanou/work/BTC_app/src/2_transfert_data.py
+python3 /home/sanou/BTC_app/src/2_transfert_data.py
 echo "Transfert des données vers MySQL effectué."
 
 sleep 3
 
-python3 /home/sanou/work/BTC_app/src/3_etl_prepare_ml.py
+python3 /home/sanou/BTC_app/src/3_etl_prepare_ml.py
 echo "Enregistrement des modèles terminée"
 
 sleep 3
