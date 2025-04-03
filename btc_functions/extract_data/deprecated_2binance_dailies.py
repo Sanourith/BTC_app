@@ -7,7 +7,7 @@ from typing import Optional, Dict, Any
 
 logger = getLogger(__name__)
 
-BASE_DIR = os.getenv("BTC_APP_BASE_DIR", "/home/sanou/BTC_app/data/1_raw")
+BASE_DIR = os.getenv("BTC_APP_BASE_DIR", "~/BTC_app/data/1_raw")
 BINANCE_URL = "https://api.binance.com/api/v3/"
 
 

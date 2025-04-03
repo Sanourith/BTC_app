@@ -9,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 # from dotenv import load_dotenv
 # from datetime import datetime
 logger = getLogger()
-# load_dotenv("/home/sanou/BTC_app/env/private.env")
+# load_dotenv("~/BTC_app/env/private.env")
 
 
 def create_connection():

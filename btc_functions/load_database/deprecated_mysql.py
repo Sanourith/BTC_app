@@ -7,7 +7,7 @@ from logging import getLogger
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 
-# load_dotenv("/home/sanou/BTC_app/env/private.env")
+# load_dotenv("~/BTC_app/env/private.env")
 logger = getLogger(__name__)
 
 

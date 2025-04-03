@@ -11,9 +11,9 @@ logger = getLogger(__name__)
 
 def data_to_json(data, file, start_yesterday):
     if data:
-        raw_data = "/home/sanou/BTC_app/data/1_raw/"
+        raw_data = "~/BTC_app/data/1_raw/"
         os.makedirs(raw_data, exist_ok=True)
-        file_path = f"/home/sanou/BTC_app/data/1_raw/{file}_{start_yesterday}.json"
+        file_path = f"~/BTC_app/data/1_raw/{file}_{start_yesterday}.json"
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
         with open(file_path, "w") as f:

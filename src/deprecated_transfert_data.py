@@ -36,15 +36,15 @@ def move_to_failed(file_path, failed_dir):
 def main():
     setup_logger()
 
-    json_dir = "/home/sanou/BTC_app/data/1_raw"
-    csv_dir = "/home/sanou/BTC_app/data/1_raw"
-    interim_dir = "/home/sanou/BTC_app/data/2_interim"
-    failed_dir = "/home/sanou/BTC_app/data/5_failed"
+    json_dir = "~/BTC_app/data/1_raw"
+    csv_dir = "~/BTC_app/data/1_raw"
+    interim_dir = "~/BTC_app/data/2_interim"
+    failed_dir = "~/BTC_app/data/5_failed"
 
     os.makedirs(interim_dir, exist_ok=True)
     os.makedirs(failed_dir, exist_ok=True)
 
-    load_dotenv("/home/sanou/BTC_app/env/private.env")
+    load_dotenv("~/BTC_app/env/private.env")
 
     engine = db_functions.create_connection()
 
