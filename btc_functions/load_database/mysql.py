@@ -2,177 +2,145 @@ import os
 import json
 import shutil
 import pandas as pd
+from pathlib import Path
 from logging import getLogger
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 
-# from dotenv import load_dotenv
-# from datetime import datetime
-logger = getLogger()
-# load_dotenv("~/BTC_app/env/private.env")
+# Logger configuration
+logger = getLogger(__name__)
 
 
 def create_connection():
     """
-    Establishes a connection to the MySQL database using SQLAlchemy and variables.
+    Establishes a connection to the MySQL database using credentials from environment variables.
 
     Returns:
-        engine: SQLAlchemy engine object or None if connection fails.
+        engine (sqlalchemy.engine.base.Engine | None): SQLAlchemy engine object if connection is successful, otherwise None.
     """
     try:
-        sql_user = os.getenv("DB_USER")
-        sql_pass = os.getenv("DB_PASSWORD")
-        sql_host = os.getenv("DB_HOST")
-        sql_port = os.getenv("DB_PORT")
-        sql_db = os.getenv("DB_NAME")
-        sqlcmd = "mysql+pymysql://"
-        # Chaîne de connexion
         connection_string = (
-            f"{sqlcmd}{sql_user}:{sql_pass}@{sql_host}:{sql_port}/{sql_db}"
+            f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}"
+            f"@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
         )
-        logger.info(f"Attempting to connect to {sql_host}:{sql_port} as {sql_user}")
-
         engine = create_engine(connection_string)
-        logger.info("Connection to MySQL established successfully.")
+        logger.info("Successfully connected to MySQL.")
         return engine
-
     except SQLAlchemyError as e:
-        logger.error(f"Error connecting to MySQL: {e}")
+        logger.error(f"MySQL connection error: {e}")
+        return None
 
 
-def convert_json_to_csv(json_file: str, csv_file: str) -> None:
+def convert_json_to_csv(json_file: Path, csv_file: Path) -> None:
     """
     Converts a JSON file to CSV format.
 
     Args:
-        json_file (str): Path to the input JSON file.
-        csv_file (str): Path to output the converted csv file.
+        json_file (Path): Path to the input JSON file.
+        csv_file (Path): Path to the output CSV file.
     """
     try:
-        with open(json_file, "r") as file:
+        with json_file.open("r") as file:
             data = json.load(file)
 
         if not data:
-            raise ValueError("JSON file is empty or unsupported")
+            raise ValueError("The JSON file is empty or incorrectly formatted.")
 
-        if isinstance(data, dict):
-            df = pd.DataFrame([data])
-        elif isinstance(data, list):
-            columns = [
-                "kline_open_time",
-                "open_price",
-                "high_price",
-                "low_price",
-                "close_price",
-                "volume",
-                "kline_close_time",
-                "quote_asset_volume",
-                "number_of_trades",
-                "taker_buy_base_asset_volume",
-                "taker_buy_quote_asset_volume",
-                "ignore",
-            ]
-            df = pd.DataFrame(data, columns=columns)
+        df = pd.DataFrame([data]) if isinstance(data, dict) else pd.DataFrame(data)
+
+        if "ignore" in df.columns:
             df.drop(columns=["ignore"], inplace=True)
-        else:
-            raise ValueError("Unsupported JSON format.")
 
         df.to_csv(csv_file, index=False)
-        logger.info(f"Successfully converted {json_file} to {csv_file}")
-
+        logger.info(f"Successfully converted: {json_file} → {csv_file}")
     except Exception as e:
-        logger.error(f"Error during conversion: {e}")
+        logger.error(f"Conversion error {json_file}: {e}")
 
 
-def convert_all_json_to_csv(json_dir: str, csv_dir: str) -> None:
+def convert_all_json_to_csv(json_dir: Path, csv_dir: Path) -> None:
     """
-    Converts all JSON files in a directory to CSV files.
+    Converts all JSON files in a given directory to CSV files.
 
     Args:
-        json_dir (str): Directory containing JSON files.
-        csv_dir (str): Directory where CSV files will be saved.
+        json_dir (Path): Path to the directory containing JSON files.
+        csv_dir (Path): Path to the directory where CSV files will be saved.
     """
-    os.makedirs(csv_dir, exist_ok=True)
+    csv_dir.mkdir(parents=True, exist_ok=True)
 
-    for filename in os.listdir(json_dir):
-        if filename.endswith(".json"):
-            json_file = os.path.join(json_dir, filename)
-            csv_file = os.path.join(csv_dir, filename.replace(".json", ".csv"))
-            convert_json_to_csv(json_file, csv_file)
-            logger.info(f"Converted {filename} to CSV successfully.")
+    for json_file in json_dir.glob("*.json"):
+        convert_json_to_csv(json_file, csv_dir / json_file.with_suffix(".csv").name)
 
 
-def insert_data_from_csv(engine, csv_file: str, table_name: str) -> None:
+def insert_data_from_csv(engine, csv_file: Path, table_name: str) -> None:
     """
     Inserts data from a CSV file into a MySQL database table.
 
     Args:
-        engine (_type_): SQLAlchemy engine object for database connection.
-        csv_file (str): Path to the CSV file to be inserted.
-        table_name (str): Name of the target table in the database.
+        engine (sqlalchemy.engine.base.Engine): SQLAlchemy engine object for database connection.
+        csv_file (Path): Path to the CSV file to be inserted.
+        table_name (str): Name of the target database table.
     """
     try:
-        data = pd.read_csv(csv_file)
-
-        with engine.begin() as connection:
-            data.to_sql(table_name, con=connection, if_exists="append", index=False)
-            logger.info(f"Inserted {len(data)} rows into the table {table_name}")
+        df = pd.read_csv(csv_file)
+        df.to_sql(table_name, con=engine, if_exists="append", index=False)
+        logger.info(f"Successfully inserted: {len(df)} rows into {table_name}")
     except SQLAlchemyError as e:
-        logger.error(f"Error inserting data from {csv_file} into {table_name}: {e}")
+        logger.error(f"Insertion error {csv_file} → {table_name}: {e}")
 
 
 def close_engine(engine):
     """
-    Closes the SQLAlchemy engine connection.
+    Closes the SQLAlchemy engine connection if it exists.
 
     Args:
-        engine (_type_): The SQLAlchemy engine to be closed.
+        engine (sqlalchemy.engine.base.Engine | None): SQLAlchemy engine object to be closed.
     """
     if engine:
         engine.dispose()
         logger.info("SQL connection closed.")
 
 
-def setup_directories(dir):
+def setup_directories(directory: Path) -> None:
     """
-    Creates necessary directories if they don't exist.
+    Creates a directory if it does not already exist.
 
     Args:
-        json_dir (_type_): Directory for json files.
-        csv_dir (_type_): Directory for csv files.
-        interim_dir (_type_): Directory for interim files.
-        failed_dir (_type_): Directory for failed files.
+        directory (Path): Path of the directory to be created.
     """
-    os.makedirs(dir, exist_ok=True)
-    logger.info(f"Directory : {dir} now exists.")
+    directory.mkdir(parents=True, exist_ok=True)
+    logger.info(f"Directory ready: {directory}")
 
 
-def get_table_name(file_path):
+def get_table_name(file_path: Path) -> str:
     """
-    Returns the table name base on the CSV file name.
+    Determines the database table name based on the given file name.
 
     Args:
-        file_path (str): Path of the CSV file.
+        file_path (Path): Path to the file whose name will be used to infer the table name.
+
+    Returns:
+        str: The corresponding table name if recognized, otherwise "unknownfile".
     """
-    if "klines" in file_path.lower():
-        return "klines"
-    elif "btc_24h" in file_path.lower():
-        return "ticker24h"
-    elif "daily" in file_path.lower():
-        return "daily"
-    else:
-        logger.warning(f"File ignored : {file_path} (not a known file).")
-        return "unknownfile"
+    filename = file_path.stem.lower()
+    table_map = {"klines": "klines", "btc_24h": "ticker24h", "daily": "daily"}
+
+    for key, table in table_map.items():
+        if key in filename:
+            return table
+
+    logger.warning(f"File ignored: {file_path} (unknown name).")
+    return "unknownfile"
 
 
-def move_to_interim(file_path, interim_dir):
+def move_to_interim(file_path: Path, interim_dir: Path) -> None:
     """
-    Moves a processed file to the interim directory.
+    Moves a processed file to an interim directory.
 
     Args:
-        file_path (str): Path of the processed file.
-        interim_dir (str): Directory where the file should be moved.
+        file_path (Path): Path of the processed file.
+        interim_dir (Path): Path of the interim directory where the file will be moved.
     """
-    destination = os.path.join(interim_dir, os.path.basename(file_path))
-    shutil.move(file_path, destination)
-    logger.info(f"File {file_path} moved to {destination}")
+    interim_dir.mkdir(parents=True, exist_ok=True)
+    destination = interim_dir / file_path.name
+    shutil.move(str(file_path), str(destination))
+    logger.info(f"Moved: {file_path} → {destination}")
