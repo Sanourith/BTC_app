@@ -4,9 +4,9 @@ echo "Extraction des données J-1 sur Binance, pour les données suivantes :"
 echo "Open price, High price, Low price, Close price, Volume, Number of Trades, Taker assets buy volume"
 
 cd
-source .venv/bin/activate
+source .venv_btc/bin/activate
 
-cd /home/sanou/workBTC_app/docker-compose
+cd /home/sanou/BTC_app/docker-compose
 
 docker compose up -d
 
