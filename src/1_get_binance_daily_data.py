@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from btc_functions.extract_data.binance_dailies import get_data_from_binance
+from btc_functions.extract_data.binance_daylies import get_data_from_binance
 from btc_functions.logging.logger_config import setup_logger
 import logging
 import os
@@ -16,7 +16,7 @@ def rename_json_files_with_date():
     date_str = yesterday.strftime("%Y%m%d")
 
     # Dossier de base où sont stockés les fichiers
-    base_dir = os.getenv("BTC_APP_BASE_DIR", "~/BTC_app/data/1_raw")
+    base_dir = os.path.expanduser(os.getenv("BTC_APP_BASE_DIR", "~/BTC_app/data/1_raw"))
 
     # Patterns à rechercher
     patterns = [
@@ -51,9 +51,10 @@ def rename_json_files_with_date():
 def main():
     setup_logger()
     endpoints = ["klines", "ticker/24hr", "ticker/tradingDay"]
+
     for endpoint in endpoints:
-        # Utilisez la fonction sans le nouveau paramètre
-        get_data_from_binance(endpoint)
+        # Sauvegarde les fichiers sans date dans le nom
+        get_data_from_binance(endpoint, use_today_for_filename=True)
         logger.info(f"Data successfully fetched and saved for endpoint: {endpoint}")
 
     # Après avoir récupéré toutes les données, renommer les fichiers pour ajouter la date

@@ -7,12 +7,12 @@ from typing import Optional, Dict, Any
 
 logger = getLogger(__name__)
 
-BASE_DIR = os.getenv("BTC_APP_BASE_DIR", "~/BTC_app/data/1_raw")
+BASE_DIR = os.path.expanduser(os.getenv("BTC_APP_BASE_DIR", "~/BTC_app/data/1_raw"))
 BINANCE_URL = "https://api.binance.com/api/v3/"
 
 
-def verif_directory_exists(path: str) -> None:
-    """Ensure the directory for a given path exists"""
+def ensure_parent_directory_exists(path: str) -> None:
+    """Ensure the parent directory for a given file path exists"""
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
 
@@ -42,7 +42,7 @@ def data_to_json(data: Any, filename: str, date: datetime) -> None:
         logger.debug(f"BASE_DIR is: {BASE_DIR}")
         logger.debug(f"Final filename is: {final_filename}")
 
-        verif_directory_exists(file_path)
+        ensure_parent_directory_exists(file_path)
 
         try:
             with open(file_path, "w") as f:
@@ -140,4 +140,3 @@ def get_data_from_binance(
         file_date = now if use_today_for_filename else yesterday
         logger.debug(f"Using date {file_date} for filename")
         data_to_json(data, config["file"], file_date)
-        return

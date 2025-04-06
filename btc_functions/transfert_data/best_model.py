@@ -1,42 +1,55 @@
 import logging
 import os
+from pathlib import Path
 import pandas as pd
-from joblib import dump
-from sklearn.model_selection import train_test_split
+import numpy as np
+from joblib import dump, load
+from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
-
-# from btc_functions.logging.logger_config import setup_logger
-# from btc_functions.transfert_data.get_data_as_df import get_df_change_timestamp
-# from dotenv import load_dotenv
+from sklearn.metrics import mean_squared_error, accuracy_score
 
 logger = logging.getLogger(__name__)
 
+# Constants
+FEATURES_COLUMNS = [
+    "open_price",
+    "high_price",
+    "low_price",
+    "close_price",
+    "volume_x",
+    "priceChange",
+    "priceChangePercent",
+]
+MODEL_FOLDER = os.path.expanduser("~/BTC_app/models_ml")
 
-def compute_model_score(model, X, y) -> float:
+
+def compute_model_score(model, X, y, cv=3) -> float:
     """
-    Calcule le score de validation croisée négatif moyen carré.
+    Calcule le score de validation croisée et retourne l'opposé du MSE pour
+    compatibilité avec les fonctions de maximisation.
 
     Args:
         model (sklearn estimator): Modèle à évaluer.
         X (pd.DataFrame): Matrice de caractéristiques.
         y (pd.Series): Variable cible.
+        cv (int): Nombre de plis pour validation croisée.
 
     Returns:
-        float: Score moyen de validation croisée.
+        float: Score moyen de validation croisée (négatif du MSE).
     """
-    cross_validation = cross_val_score(
-        model, X, y, cv=3, scoring="neg_mean_squared_error"
-    )
+    with np.errstate(divide="ignore", invalid="ignore"):
+        cross_validation = cross_val_score(
+            model, X, y, cv=cv, scoring="neg_mean_squared_error"
+        )
     score = cross_validation.mean()
-    logger.info(f"Score {model}: {score:.4f}")
+    logger.info(f"Score {type(model).__name__}: {score:.4f}")
     return score
 
 
-def train_and_save_model(model, X, y, path_to_model: str):
+def train_and_save_model(model, X, y, path_to_model):
     """
     Entraîne un modèle et le sauvegarde dans un fichier.
 
@@ -44,11 +57,11 @@ def train_and_save_model(model, X, y, path_to_model: str):
         model (sklearn estimator): Modèle à entraîner.
         X (pd.DataFrame): Matrice de caractéristiques.
         y (pd.Series): Variable cible.
-        path_to_model (str): Chemin pour sauvegarder le modèle.
+        path_to_model (str or Path): Chemin pour sauvegarder le modèle.
     """
     model.fit(X, y)
     dump(model, path_to_model)
-    logger.info(f"Modèle {model} sauvegardé à {path_to_model}")
+    logger.info(f"Modèle {type(model).__name__} sauvegardé à {path_to_model}")
 
 
 def prepare_data(df: pd.DataFrame) -> tuple:
@@ -61,29 +74,33 @@ def prepare_data(df: pd.DataFrame) -> tuple:
     Returns:
         tuple: (X, y), où X est la matrice de caractéristiques et y la variable cible.
     """
-    features_columns = [
-        "open_price",
-        "high_price",
-        "low_price",
-        "close_price",
-        "volume_x",
-        "priceChange",
-        "priceChangePercent",
-    ]
+    missing_cols = [col for col in FEATURES_COLUMNS if col not in df.columns]
+    if missing_cols:
+        raise ValueError(f"Colonnes manquantes dans le DataFrame: {missing_cols}")
 
-    X = df[features_columns].copy()
-    X["price_change"] = X["close_price"].shift(-1) - df["close_price"]
-    X["trend"] = (X["price_change"] > 0).astype(int)
-    # 1 si le prix augmente, 0 sinon
+    # Copier seulement les colonnes nécessaires
+    X = df[FEATURES_COLUMNS].copy()
 
-    y = X["trend"]
-    X = X.drop(["trend", "price_change"], axis=1)
+    # Calcul de la variation de prix pour la prédiction
+    X["price_change"] = X["close_price"].shift(-1) - X["close_price"]
+
+    # Création de la variable cible (tendance: hausse ou baisse)
+    y = (X["price_change"] > 0).astype(int)
+
+    # Supprimer la colonne price_change qui contient des informations futures
+    X = X.drop(["price_change"], axis=1)
+
+    # Supprimer les lignes avec des valeurs manquantes
+    valid_indices = ~X.isna().any(axis=1) & ~y.isna()
+    X = X[valid_indices]
+    y = y[valid_indices]
+
     return X, y
 
 
-def merge_dfs(df1, df2, col1, col2, typ) -> pd.DataFrame:
+def merge_dfs(df1, df2, col1, col2, typ="inner") -> pd.DataFrame:
     """
-    Merges two DataFrames on specified columns.
+    Merges two DataFrames on specified columns with error handling.
 
     Args:
         df1 (pd.DataFrame): First DataFrame.
@@ -95,7 +112,20 @@ def merge_dfs(df1, df2, col1, col2, typ) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Merged DataFrame.
     """
-    return pd.merge(df1, df2, left_on=col1, right_on=col2, how=typ)
+    # Vérification de la présence des colonnes
+    if col1 not in df1.columns:
+        raise ValueError(f"Colonne {col1} non trouvée dans le premier DataFrame")
+    if col2 not in df2.columns:
+        raise ValueError(f"Colonne {col2} non trouvée dans le deuxième DataFrame")
+
+    # Effectuer la fusion
+    try:
+        merged_df = pd.merge(df1, df2, left_on=col1, right_on=col2, how=typ)
+        logger.info(f"Fusion réussie: {len(merged_df)} lignes résultantes")
+        return merged_df
+    except Exception as e:
+        logger.error(f"Erreur lors de la fusion: {str(e)}")
+        raise
 
 
 def format_time_ml(df, col) -> pd.DataFrame:
@@ -110,10 +140,20 @@ def format_time_ml(df, col) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with formatted time column.
     """
-    df[col] = pd.to_datetime(df[col]).dt.floor("D")
+    if col not in df.columns:
+        raise ValueError(f"Colonne {col} non trouvée dans le DataFrame")
+
+    # Créer une copie pour éviter les SettingWithCopyWarning
+    result_df = df.copy()
+
+    # Convertir en datetime et arrondir au jour
+    result_df[col] = pd.to_datetime(result_df[col]).dt.floor("D")
+
+    # Ajustement spécifique pour openTime
     if col == "openTime":
-        df[col] = df[col] - pd.Timedelta(days=1)
-    return df
+        result_df[col] = result_df[col] - pd.Timedelta(days=1)
+
+    return result_df
 
 
 def train_and_select_best_models(merge_df: pd.DataFrame) -> str:
@@ -127,52 +167,71 @@ def train_and_select_best_models(merge_df: pd.DataFrame) -> str:
         str: The name of the best-performing model.
     """
     X, y = prepare_data(merge_df)
+    if len(X) == 0:
+        raise ValueError("Aucune donnée valide après préparation")
+
+    # Division train/test
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
     )
 
+    # Normalisation des données
     scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
 
+    # Sauvegarde du scaler pour utilisation future
+    os.makedirs(MODEL_FOLDER, exist_ok=True)
+    dump(scaler, os.path.join(MODEL_FOLDER, "scaler.pickle"))
+
+    # Définition des modèles à tester
     models = {
         "LinearRegression": LinearRegression(),
         "DecisionTreeRegressor": DecisionTreeRegressor(random_state=42),
-        "RandomForestRegressor": RandomForestRegressor(random_state=42),
+        "RandomForestRegressor": RandomForestRegressor(
+            n_estimators=100, random_state=42
+        ),
     }
 
+    # Évaluation des modèles
     scores_models = {}
-    path_model_folder = "~/BTC_app/models_ml"
-    os.makedirs(path_model_folder, exist_ok=True)
-
     for name, model in models.items():
-        score = compute_model_score(model, X_train, y_train)
-        logger.info(f"Score {name} = {score} <<<")
+        # Calcul du score par validation croisée
+        score = compute_model_score(model, X_train_scaled, y_train)
         scores_models[name] = score
-        path_to_model = os.path.join(path_model_folder, f"{name}_model.pickle")
-        train_and_save_model(model, X_train, y_train, path_to_model)
 
+        # Entraînement et sauvegarde du modèle
+        path_to_model = os.path.join(MODEL_FOLDER, f"{name}_model.pickle")
+        train_and_save_model(model, X_train_scaled, y_train, path_to_model)
+
+    # Sélection du meilleur modèle
     best_model_name = max(scores_models, key=scores_models.get)
     best_model = models[best_model_name]
     logger.info(
-        f"{best_model_name} selected with score: {scores_models[best_model_name]:.4f}"
+        f"{best_model_name} sélectionné avec score: {scores_models[best_model_name]:.4f}"
     )
-    best_model_path = os.path.join(path_model_folder, f"best_{best_model_name}.pickle")
-    train_and_save_model(best_model, X_train, y_train, best_model_path)
 
-    # Prediction
-    y_pred = best_model.predict(X_test)
+    # Sauvegarde du meilleur modèle
+    best_model_path = os.path.join(MODEL_FOLDER, f"best_model.pickle")
+    train_and_save_model(best_model, X_train_scaled, y_train, best_model_path)
+
+    # Évaluation sur l'ensemble de test
+    y_pred = best_model.predict(X_test_scaled)
     y_pred_binary = (y_pred > 0.5).astype(int)
 
-    accuracy = (y_test == y_pred_binary).mean()
-    logger.info(f"Accuracy of best model ({best_model_name}): {accuracy:.4f}")
+    # Calcul des métriques
+    mse = mean_squared_error(y_test, y_pred)
+    accuracy = accuracy_score(y_test, y_pred_binary)
 
-    predictions_df = pd.DataFrame({"Actual": y_test, "Predicted": y_pred_binary})
-    predictions_df.to_csv(
-        "~/BTC_app/models_ml/predictions.csv", index=False
+    logger.info(f"MSE du meilleur modèle ({best_model_name}): {mse:.4f}")
+    logger.info(f"Précision du meilleur modèle ({best_model_name}): {accuracy:.4f}")
+
+    # Sauvegarde des prédictions pour analyse
+    predictions_df = pd.DataFrame(
+        {"Actual": y_test, "Predicted_Raw": y_pred, "Predicted_Binary": y_pred_binary}
     )
-    logger.info(
-        "Predictions saved in ~/BTC_app/models_ml/predictions.csv"
-    )
+    predictions_path = os.path.join(MODEL_FOLDER, "predictions.csv")
+    predictions_df.to_csv(predictions_path, index=False)
+    logger.info(f"Prédictions sauvegardées dans {predictions_path}")
 
     return best_model_name

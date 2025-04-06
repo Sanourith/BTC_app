@@ -4,7 +4,7 @@ import json
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
 
-from btc_functions.extract_data.binance_dailies import (
+from BTC_app.btc_functions.extract_data.binance_daylies import (
     verif_directory_exist,
     data_to_json,
     request_data,
