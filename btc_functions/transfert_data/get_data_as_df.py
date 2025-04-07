@@ -16,16 +16,18 @@ def database_connection():
     Gestionnaire de contexte pour la connexion à la base de données.
     Assure la fermeture de la connexion même en cas d'exception.
     """
-    connection = None
+    engine = None
     try:
-        connection = db_functions.create_connection()
-        yield connection
+        engine = db_functions.create_connection()
+        yield engine
     except Exception as e:
         logger.error(f"Erreur de connexion à la base de données: {e}")
         raise
     finally:
-        if connection:
-            connection.close()
+        if engine:
+            db_functions.close_engine(
+                engine
+            )  # Utiliser la fonction close_engine que vous avez déjà
             logger.debug("Connexion à la base de données fermée")
 
 
@@ -50,8 +52,11 @@ def get_df_change_timestamp(table_name, col1, col2=None) -> pd.DataFrame:
     # Récupération des données avec gestion de la connexion
     with database_connection() as engine:
         try:
+            if engine is None:
+                logger.error("Impossible de créer une connexion à la base de données")
+                return pd.DataFrame()  # Retourne un DataFrame vide
+
             df = pd.read_sql_query(query, engine)
-            logger.info(f"Table {table_name} récupérée avec succès: {len(df)} lignes")
         except Exception as e:
             logger.error(
                 f"Erreur lors de la récupération de la table {table_name}: {e}"

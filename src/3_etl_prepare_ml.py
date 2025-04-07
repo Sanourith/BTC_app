@@ -86,8 +86,7 @@ def main():
     args = parse_arguments()
 
     # Configuration du logger
-    log_level = logging.DEBUG if args.debug else logging.INFO
-    setup_logger(log_level=log_level)
+    setup_logger()
 
     # Chargement des variables d'environnement
     env_path = os.path.expanduser(args.env_file)
